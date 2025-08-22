@@ -59,17 +59,6 @@
       margin: 10px 0;
     }
 
-    .next-btn {
-      margin-top: 20px;
-      padding: 10px 25px;
-      font-size: 16px;
-      background-color: #00bfff;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
     .end-screen {
       display: none;
     }
@@ -97,7 +86,7 @@
 <div class="container end-screen" id="end-screen">
   <h1>Keren! Kamu Menyelesaikan Kuis 🎉</h1>
   <video controls autoplay>
-    <source src="https://files.catbox.moe/qnd2vz.mp4" type="video/mp4">
+    <source src="https://files.catbox.moe/brq53t.mp4" type="video/mp4">
     Browser kamu tidak mendukung video.
   </video>
   <audio autoplay loop>
@@ -109,6 +98,7 @@
 <!-- Suara efek -->
 <audio id="benar-sound" src="https://files.catbox.moe/u4bovg.m4a"></audio>
 <audio id="salah-sound" src="https://files.catbox.moe/ayeqnv.m4a"></audio>
+<audio id="win-sound" src="https://files.catbox.moe/zywlt3.mp3"></audio> <!-- Suara kemenangan -->
 
 <script>
   const questions = [
@@ -116,19 +106,19 @@
       question: "Siapa pemegang Kamajaya?",
       options: ["Ghozi", "Agong", "Tamim", "Wicek"],
       answer: 0,
-      image: "https://ibb.co.com/k2j0ZmYd"
+      image: "https://files.catbox.moe/syuter.jpeg" // Ganti dengan link asli kamu
     },
     {
       question: "Siapa artis Kamajaya?",
       options: ["Wino anake Dayak", "Ghozi", "Ninik"],
       answer: 0,
-      image: "https://ibb.co.com/DHVVNtFW"
+      image: "https://files.catbox.moe/aee1aw.jpg"
     },
     {
       question: "Siapa cogan Kamajaya?",
       options: ["Alpan", "Arip", "Hizbil"],
       answer: 2,
-      image: "https://ibb.co.com/XwyT46s"
+      image: "https://files.catbox.moe/62yc7v.jpg"
     }
   ];
 
@@ -141,6 +131,7 @@
 
   const benarSound = document.getElementById("benar-sound");
   const salahSound = document.getElementById("salah-sound");
+  const winSound = document.getElementById("win-sound");
 
   function loadQuestion() {
     const q = questions[currentQuestion];
@@ -167,38 +158,35 @@
       salahSound.play();
     }
 
-    // Disable all buttons
+    // Disable semua tombol
     Array.from(optionsEl.children).forEach(btn => btn.disabled = true);
   }
 
   function showImage(imageFile) {
     feedbackEl.innerHTML = `
       <img src="${imageFile}" alt="Gambar" />
-      ${currentQuestion < questions.length - 1 ? 
-        '<button class="next-btn" onclick="nextQuestion()">Lanjut</button>' : ''}
+      <p>Memuat soal berikutnya...</p>
     `;
 
-    // Jika soal terakhir, langsung tampilkan layar akhir setelah delay
     if (currentQuestion === questions.length - 1) {
       setTimeout(showEndScreen, 3000);
-    }
-  }
-
-  function nextQuestion() {
-    currentQuestion++;
-    if (currentQuestion < questions.length) {
-      loadQuestion();
+    } else {
+      setTimeout(() => {
+        currentQuestion++;
+        loadQuestion();
+      }, 3000);
     }
   }
 
   function showEndScreen() {
     quizContainer.style.display = "none";
     endScreen.style.display = "block";
+    winSound.play(); // Putar suara kemenangan
   }
 
-  // Start
+  // Mulai kuis
   loadQuestion();
 </script>
 
 </body>
-  </html>
+</html>
