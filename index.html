@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kuis Kamajaya</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+      margin-top: 50px;
+      background-color: rgba(0, 0, 0, 0.4);
+      border-radius: 15px;
+    }
+
+    h1 {
+      color: #00ffff;
+    }
+
+    .question {
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+
+    .options button {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      background-color: #1e90ff;
+      color: #fff;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .options button:hover {
+      background-color: #00bfff;
+    }
+
+    .feedback {
+      margin-top: 20px;
+    }
+
+    .feedback img {
+      width: 300px;
+      border-radius: 10px;
+      margin: 10px 0;
+    }
+
+    .next-btn {
+      margin-top: 20px;
+      padding: 10px 25px;
+      font-size: 16px;
+      background-color: #00bfff;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .end-screen {
+      display: none;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    audio {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="quiz-container">
+  <h1>Kuis Kamajaya</h1>
+  <div class="question" id="question">Loading...</div>
+  <div class="options" id="options"></div>
+  <div class="feedback" id="feedback"></div>
+</div>
+
+<div class="container end-screen" id="end-screen">
+  <h1>Keren! Kamu Menyelesaikan Kuis 🎉</h1>
+  <video controls autoplay>
+    <source src="https://files.catbox.moe/qnd2vz.mp4" type="video/mp4">
+    Browser kamu tidak mendukung video.
+  </video>
+  <audio autoplay loop>
+    <source src="https://files.catbox.moe/8v73gz.mp3" type="audio/mp3">
+    Browser kamu tidak mendukung audio.
+  </audio>
+</div>
+
+<!-- Suara efek -->
+<audio id="benar-sound" src="https://files.catbox.moe/u4bovg.m4a"></audio>
+<audio id="salah-sound" src="https://files.catbox.moe/ayeqnv.m4a"></audio>
+
+<script>
+  const questions = [
+    {
+      question: "Siapa pemegang Kamajaya?",
+      options: ["Ghozi", "Agong", "Tamim", "Wicek"],
+      answer: 0,
+      image: "https://ibb.co.com/k2j0ZmYd"
+    },
+    {
+      question: "Siapa artis Kamajaya?",
+      options: ["Wino anake Dayak", "Ghozi", "Ninik"],
+      answer: 0,
+      image: "https://ibb.co.com/DHVVNtFW"
+    },
+    {
+      question: "Siapa cogan Kamajaya?",
+      options: ["Alpan", "Arip", "Hizbil"],
+      answer: 2,
+      image: "https://ibb.co.com/XwyT46s"
+    }
+  ];
+
+  let currentQuestion = 0;
+  const quizContainer = document.getElementById("quiz-container");
+  const questionEl = document.getElementById("question");
+  const optionsEl = document.getElementById("options");
+  const feedbackEl = document.getElementById("feedback");
+  const endScreen = document.getElementById("end-screen");
+
+  const benarSound = document.getElementById("benar-sound");
+  const salahSound = document.getElementById("salah-sound");
+
+  function loadQuestion() {
+    const q = questions[currentQuestion];
+    questionEl.textContent = q.question;
+    optionsEl.innerHTML = "";
+    feedbackEl.innerHTML = "";
+
+    q.options.forEach((option, index) => {
+      const btn = document.createElement("button");
+      btn.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+      btn.onclick = () => checkAnswer(index);
+      optionsEl.appendChild(btn);
+    });
+  }
+
+  function checkAnswer(selectedIndex) {
+    const q = questions[currentQuestion];
+    const correct = selectedIndex === q.answer;
+
+    if (correct) {
+      benarSound.play();
+      showImage(q.image);
+    } else {
+      salahSound.play();
+    }
+
+    // Disable all buttons
+    Array.from(optionsEl.children).forEach(btn => btn.disabled = true);
+  }
+
+  function showImage(imageFile) {
+    feedbackEl.innerHTML = `
+      <img src="${imageFile}" alt="Gambar" />
+      ${currentQuestion < questions.length - 1 ? 
+        '<button class="next-btn" onclick="nextQuestion()">Lanjut</button>' : ''}
+    `;
+
+    // Jika soal terakhir, langsung tampilkan layar akhir setelah delay
+    if (currentQuestion === questions.length - 1) {
+      setTimeout(showEndScreen, 3000);
+    }
+  }
+
+  function nextQuestion() {
+    currentQuestion++;
+    if (currentQuestion < questions.length) {
+      loadQuestion();
+    }
+  }
+
+  function showEndScreen() {
+    quizContainer.style.display = "none";
+    endScreen.style.display = "block";
+  }
+
+  // Start
+  loadQuestion();
+</script>
+
+</body>
+  </html>
