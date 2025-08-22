@@ -1,91 +1,170 @@
 <!DOCTYPE html><html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>AKU DAN KENANGAN WAKTU ITU</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AKU DAN KENANGAN WAKTU ITU – Kuis</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; background: #f9f9f9; }
-    .quiz, .logo, .video { display: none; }
-    .active { display: block; }
-    .logo img { max-width: 400px; margin-top: 50px; border-radius: 12px; }
-    video { max-width: 90%; margin-top: 40px; border-radius: 12px; }
+    :root{
+      --bg:#0f172a;
+      --fg:#e5e7eb;
+      --muted:#94a3b8;
+      --card:#111827;
+      --accent:#22c55e;
+      --danger:#ef4444;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans";background:linear-gradient(180deg,#0b1220,#0f172a);color:var(--fg);min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .card{width:min(720px,95vw);background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden}
+    header{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;gap:12px;align-items:center;justify-content:space-between}
+    h1{font-size:clamp(18px,2.6vw,28px);margin:0;letter-spacing:.3px}
+    .progress{height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+    .progress>span{display:block;height:100%;background:linear-gradient(90deg,#06b6d4,#22c55e);width:0%}.section{padding:28px}
+.question{font-size:clamp(18px,2.4vw,24px);line-height:1.4;margin:0 0 18px}
+.options{display:grid;gap:12px}
+.btn{appearance:none;border:none;border-radius:14px;padding:14px 16px;font-size:16px;line-height:1.4;cursor:pointer;background:#1f2937;color:var(--fg);text-align:left;transition:transform .06s ease, background .15s ease, border-color .15s ease; border:1px solid rgba(255,255,255,.06)}
+.btn:hover{transform:translateY(-1px)}
+.btn.correct{outline:2px solid var(--accent);background:rgba(34,197,94,.15)}
+.btn.wrong{outline:2px solid var(--danger);background:rgba(239,68,68,.12)}
+
+.meta{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:14px;margin-top:18px}
+
+.screen{display:none;min-height:50dvh;align-items:center;justify-content:center}
+.screen.active{display:flex}
+
+.logo-wrap{display:flex;align-items:center;justify-content:center;width:100%;}
+.logo-wrap img{max-width:min(400px,60vw);height:auto;display:block;margin:auto;filter:drop-shadow(0 20px 40px rgba(0,0,0,.45));}
+
+.video-wrap{width:100%;display:flex;justify-content:center}
+video{width:min(800px,94vw);border-radius:16px;outline:none;border:1px solid rgba(255,255,255,.08);box-shadow:0 30px 80px rgba(0,0,0,.45)}
+
+.hint{font-size:13px;color:var(--muted);text-align:center;margin-top:10px}
+
   </style>
 </head>
 <body>
-  <h1>AKU DAN KENANGAN WAKTU ITU</h1>  <div id="quiz" class="quiz active"></div>
-  <div id="logo" class="logo"></div>
-  <div id="video" class="video">
-    <video id="finalVideo" controls autoplay>
-      <source src="https://files.catbox.moe/t19maw.mp4" type="video/mp4">
-      Browser kamu tidak mendukung video.
-    </video>
+  <div class="card" id="app">
+    <header>
+      <h1>AKU DAN KENANGAN WAKTU ITU</h1>
+      <div class="progress" aria-hidden="true" style="flex:1; margin-left:16px"><span id="bar"></span></div>
+    </header><!-- QUIZ SCREEN -->
+<section class="section" id="quizScreen">
+  <p class="question" id="qtext"></p>
+  <div class="options" id="opts"></div>
+  <div class="meta">
+    <span id="step"></span>
+    <span id="feedback" aria-live="polite"></span>
+  </div>
+  <p class="hint">Pilih jawaban yang benar. Jika benar, layar akan beralih ke logo sebentar. Setelah soal terakhir, otomatis diputar video.</p>
+</section>
+
+<!-- LOGO SCREEN -->
+<section class="section screen" id="logoScreen" aria-label="Logo">
+  <div class="logo-wrap">
+    <img id="logoImg" src="" alt="Logo" />
+  </div>
+</section>
+
+<!-- VIDEO SCREEN -->
+<section class="section screen" id="videoScreen" aria-label="Video">
+  <div class="video-wrap">
+    <video id="video" src="https://files.catbox.moe/t19maw.mp4" controls autoplay playsinline></video>
+  </div>
+</section>
+
   </div>  <script>
-    const questions = [
-      {
-        q: "Siapa RT terkenal kampung marem?",
-        options: ["Ghozi", "Agung", "Wicek"],
-        answer: 0,
-        logo: "https://files.catbox.moe/syuter.jpeg"
-      },
-      {
-        q: "Siapa cogan kamajaya?",
-        options: ["Aksin", "Tamim", "Hizbil"],
-        answer: 2,
-        logo: "https://files.catbox.moe/aee1aw.jpg"
-      },
-      {
-        q: "Siapa artis kamajaya?",
-        options: ["Wino anake dayak", "Jawabannya A", "Baca jawaban nomor 2"],
-        answer: 0,
-        logo: "https://files.catbox.moe/62yc7v.jpg"
-      }
+    const LOGOS = [
+      "https://files.catbox.moe/syuter.jpeg",
+      "https://files.catbox.moe/aee1aw.jpg",
+      "https://files.catbox.moe/62yc7v.jpg"
     ];
 
-    let current = 0;
+    const quiz = [
+      {q: '1. siapa rt terkenal kampung marem?', options: ['a. ghozi','b. agung','c. wicek'], correctIndex: 0},
+      {q: '2. siapa cogan kamajaya?', options: ['a. aksin','b. tamim','c. hizbil'], correctIndex: 2},
+      {q: '3. siapa artis kamajaya', options: ['a. wino anake dayak','b. jawabannya A','c. baca jawaban nomor 2'], correctIndex: 0}
+    ];
 
-    function showQuestion(index) {
-      const quizDiv = document.getElementById('quiz');
-      quizDiv.innerHTML = "";
-      const q = document.createElement('h2');
-      q.textContent = questions[index].q;
-      quizDiv.appendChild(q);
+    const qtext   = document.getElementById('qtext');
+    const opts    = document.getElementById('opts');
+    const step    = document.getElementById('step');
+    const feedback= document.getElementById('feedback');
+    const bar     = document.getElementById('bar');
 
-      questions[index].options.forEach((opt, i) => {
-        const btn = document.createElement('button');
-        btn.textContent = opt;
-        btn.style.display = 'block';
-        btn.style.margin = '10px auto';
-        btn.onclick = () => checkAnswer(i);
-        quizDiv.appendChild(btn);
-      });
+    const quizScreen  = document.getElementById('quizScreen');
+    const logoScreen  = document.getElementById('logoScreen');
+    const videoScreen = document.getElementById('videoScreen');
+    const videoEl     = document.getElementById('video');
+    const logoImg     = document.getElementById('logoImg');
+
+    let idx = 0;
+
+    function setProgress(i){
+      const percent = Math.round((i/quiz.length)*100);
+      bar.style.width = percent + '%';
     }
 
-    function checkAnswer(i) {
-      if (i === questions[current].answer) {
-        showLogo(questions[current].logo);
-      } else {
-        alert("Salah, coba lagi!");
+    function renderQuestion(){
+      quizScreen.style.display = 'block';
+      logoScreen.classList.remove('active');
+      videoScreen.classList.remove('active');
+
+      const item = quiz[idx];
+      qtext.textContent = item.q;
+      opts.innerHTML = '';
+
+      item.options.forEach((label, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.textContent = label;
+        btn.addEventListener('click', () => handleAnswer(i));
+        opts.appendChild(btn);
+      });
+
+      step.textContent = `Soal ${idx+1} dari ${quiz.length}`;
+      feedback.textContent = '';
+      setProgress(idx);
+    }
+
+    function handleAnswer(chosen){
+      const correct = quiz[idx].correctIndex;
+      Array.from(opts.children).forEach((b, i)=>{
+        if(i===correct) b.classList.add('correct');
+        if(i===chosen && i!==correct) b.classList.add('wrong');
+        b.disabled = true;
+      });
+
+      if(chosen === correct){
+        feedback.textContent = '✅ Benar!';
+        toLogoThenNext();
+      }else{
+        feedback.textContent = '❌ Salah, coba lagi.';
+        setTimeout(()=>{
+          Array.from(opts.children).forEach((b)=>{b.classList.remove('wrong','correct'); b.disabled=false;});
+          feedback.textContent = '';
+        }, 800);
       }
     }
 
-    function showLogo(src) {
-      document.getElementById('quiz').classList.remove('active');
-      const logoDiv = document.getElementById('logo');
-      logoDiv.innerHTML = `<img src="${src}" alt="Logo">`;
-      logoDiv.classList.add('active');
+    function toLogoThenNext(){
+      quizScreen.style.display = 'none';
+      logoScreen.classList.add('active');
+      logoImg.src = LOGOS[idx];
 
-      setTimeout(() => {
-        logoDiv.classList.remove('active');
-        current++;
-        if (current < questions.length) {
-          document.getElementById('quiz').classList.add('active');
-          showQuestion(current);
-        } else {
-          document.getElementById('video').classList.add('active');
-          document.getElementById('finalVideo').play();
+      const isLast = idx === quiz.length - 1;
+
+      setTimeout(()=>{
+        if(isLast){
+          logoScreen.classList.remove('active');
+          videoScreen.classList.add('active');
+          setProgress(quiz.length);
+          videoEl.play().catch(()=>{});
+        }else{
+          idx++;
+          renderQuestion();
         }
-      }, 2000);
+      }, 1200);
     }
 
-    showQuestion(current);
+    renderQuestion();
   </script></body>
 </html>
