@@ -1,200 +1,173 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kuis Kamajaya</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AKU DAN KENANGAN WAKTU ITU – Kuis</title>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-      color: #fff;
-      text-align: center;
-      margin: 0;
-      padding: 0;
+    :root{
+      --bg:#0f172a;
+      --fg:#e5e7eb;
+      --muted:#94a3b8;
+      --card:#111827;
+      --accent:#22c55e;
+      --danger:#ef4444;
     }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans";background:linear-gradient(180deg,#0b1220,#0f172a);color:var(--fg);min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .card{width:min(720px,95vw);background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden}
+    header{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;gap:12px;align-items:center;justify-content:space-between}
+    h1{font-size:clamp(18px,2.6vw,28px);margin:0;letter-spacing:.3px}
+    .progress{height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+    .progress>span{display:block;height:100%;background:linear-gradient(90deg,#06b6d4,#22c55e);width:0%}.section{padding:28px}
+.question{font-size:clamp(18px,2.4vw,24px);line-height:1.4;margin:0 0 18px}
+.options{display:grid;gap:12px}
+.btn{appearance:none;border:none;border-radius:14px;padding:14px 16px;font-size:16px;line-height:1.4;cursor:pointer;background:#1f2937;color:var(--fg);text-align:left;transition:transform .06s ease, background .15s ease, border-color .15s ease; border:1px solid rgba(255,255,255,.06)}
+.btn:hover{transform:translateY(-1px)}
+.btn.correct{outline:2px solid var(--accent);background:rgba(34,197,94,.15)}
+.btn.wrong{outline:2px solid var(--danger);background:rgba(239,68,68,.12)}
 
-    .container {
-      max-width: 700px;
-      margin: auto;
-      padding: 20px;
-      margin-top: 50px;
-      background-color: rgba(0, 0, 0, 0.4);
-      border-radius: 15px;
-    }
+.meta{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:14px;margin-top:18px}
 
-    h1 {
-      color: #00ffff;
-    }
+.screen{display:none;min-height:50dvh;align-items:center;justify-content:center}
+.screen.active{display:flex}
 
-    /* Menambahkan styling untuk logo */
-    .logo {
-      width: 150px; /* Sesuaikan ukuran logo */
-      margin: 0 auto 20px;
-      display: block;
-    }
+.logo-wrap{display:flex;align-items:center;justify-content:center;width:100%;}
+.logo-wrap img{max-width:min(400px,60vw);height:auto;display:block;margin:auto;filter:drop-shadow(0 20px 40px rgba(0,0,0,.45));}
 
-    .question {
-      font-size: 22px;
-      margin-bottom: 20px;
-    }
+.video-wrap{width:100%;display:flex;justify-content:center}
+video{width:min(800px,94vw);border-radius:16px;outline:none;border:1px solid rgba(255,255,255,.08);box-shadow:0 30px 80px rgba(0,0,0,.45)}
 
-    .options button {
-      display: block;
-      margin: 10px auto;
-      padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 10px;
-      background-color: #1e90ff;
-      color: #fff;
-      cursor: pointer;
-      transition: 0.3s;
-    }
+.hint{font-size:13px;color:var(--muted);text-align:center;margin-top:10px}
 
-    .options button:hover {
-      background-color: #00bfff;
-    }
-
-    .feedback {
-      margin-top: 20px;
-    }
-
-    .feedback img {
-      width: 300px;
-      border-radius: 10px;
-      margin: 10px 0;
-    }
-
-    .end-screen {
-      display: none;
-    }
-
-    video {
-      width: 100%;
-      border-radius: 10px;
-      margin-top: 20px;
-    }
-
-    audio {
-      display: none;
-    }
   </style>
 </head>
 <body>
+  <div class="card" id="app">
+    <header>
+      <h1>AKU DAN KENANGAN WAKTU ITU</h1>
+      <div class="progress" aria-hidden="true" style="flex:1; margin-left:16px"><span id="bar"></span></div>
+    </header><!-- QUIZ SCREEN -->
+<section class="section" id="quizScreen">
+  <p class="question" id="qtext"></p>
+  <div class="options" id="opts"></div>
+  <div class="meta">
+    <span id="step"></span>
+    <span id="feedback" aria-live="polite"></span>
+  </div>
+  <p class="hint">Pilih jawaban yang benar. Jika benar, layar akan beralih ke logo sebentar. Setelah soal terakhir, otomatis diputar video.</p>
+</section>
 
-<div class="container" id="quiz-container">
-  <img src="https://example.com/logo.png" alt="Logo Kamajaya" class="logo" /> <!-- Ganti URL dengan logo kamu -->
-  <h1>Kuis Kamajaya</h1>
-  <div class="question" id="question">Loading...</div>
-  <div class="options" id="options"></div>
-  <div class="feedback" id="feedback"></div>
-</div>
+<!-- LOGO SCREEN -->
+<section class="section screen" id="logoScreen" aria-label="Logo">
+  <div class="logo-wrap">
+    <img id="logoImg" src="" alt="Logo" />
+  </div>
+</section>
 
-<div class="container end-screen" id="end-screen">
-  <h1>Keren! Kamu Menyelesaikan Kuis 🎉</h1>
-  <video controls autoplay>
-    <source src="https://files.catbox.moe/brq53t.mp4" type="video/mp4">
-    Browser kamu tidak mendukung video.
-  </video>
-  <audio autoplay loop>
-    <source src="https://files.catbox.moe/8v73gz.mp3" type="audio/mp3">
-    Browser kamu tidak mendukung audio.
-  </audio>
-</div>
+<!-- VIDEO SCREEN -->
+<section class="section screen" id="videoScreen" aria-label="Video">
+  <div class="video-wrap">
+    <video id="video" src="video.mp4" controls autoplay playsinline></video>
+  </div>
+</section>
 
-<!-- Suara efek -->
-<audio id="benar-sound" src="https://files.catbox.moe/u4bovg.m4a"></audio>
-<audio id="salah-sound" src="https://files.catbox.moe/ayeqnv.m4a"></audio>
-<audio id="win-sound" src="https://files.catbox.moe/zywlt3.mp3"></audio> <!-- Suara kemenangan -->
+  </div>  <script>
+    const LOGOS = [
+      "https://files.catbox.moe/syuter.jpeg",
+      "https://files.catbox.moe/aee1aw.jpg",
+      "https://files.catbox.moe/62yc7v.jpg"
+    ];
+    const VIDEO_SRC = 'video.mp4';
 
-<script>
-  const questions = [
-    {
-      question: "Siapa pemegang Kamajaya?",
-      options: ["Ghozi", "Agong", "Tamim", "Wicek"],
-      answer: 0,
-      image: "https://files.catbox.moe/syuter.jpeg" // Ganti dengan link asli kamu
-    },
-    {
-      question: "Siapa artis Kamajaya?",
-      options: ["Wino anake Dayak", "Ghozi", "Ninik"],
-      answer: 0,
-      image: "https://files.catbox.moe/aee1aw.jpg"
-    },
-    {
-      question: "Siapa cogan Kamajaya?",
-      options: ["Alpan", "Arip", "Hizbil"],
-      answer: 2,
-      image: "https://files.catbox.moe/62yc7v.jpg"
-    }
-  ];
+    document.getElementById('video').src = VIDEO_SRC;
 
-  let currentQuestion = 0;
-  const quizContainer = document.getElementById("quiz-container");
-  const questionEl = document.getElementById("question");
-  const optionsEl = document.getElementById("options");
-  const feedbackEl = document.getElementById("feedback");
-  const endScreen = document.getElementById("end-screen");
+    const quiz = [
+      {q: '1. siapa rt terkenal kampung marem?', options: ['a. ghozi','b. agung','c. wicek'], correctIndex: 0},
+      {q: '2. siapa cogan kamajaya?', options: ['a. aksin','b. tamim','c. hizbil'], correctIndex: 2},
+      {q: '3. siapa artis kamajaya', options: ['a. wino anake dayak','b. jawabannya A','c. baca jawaban nomor 2'], correctIndex: 0}
+    ];
 
-  const benarSound = document.getElementById("benar-sound");
-  const salahSound = document.getElementById("salah-sound");
-  const winSound = document.getElementById("win-sound");
+    const qtext   = document.getElementById('qtext');
+    const opts    = document.getElementById('opts');
+    const step    = document.getElementById('step');
+    const feedback= document.getElementById('feedback');
+    const bar     = document.getElementById('bar');
 
-  function loadQuestion() {
-    const q = questions[currentQuestion];
-    questionEl.textContent = q.question;
-    optionsEl.innerHTML = "";
-    feedbackEl.innerHTML = "";
+    const quizScreen  = document.getElementById('quizScreen');
+    const logoScreen  = document.getElementById('logoScreen');
+    const videoScreen = document.getElementById('videoScreen');
+    const videoEl     = document.getElementById('video');
+    const logoImg     = document.getElementById('logoImg');
 
-    q.options.forEach((option, index) => {
-      const btn = document.createElement("button");
-      btn.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
-      btn.onclick = () => checkAnswer(index);
-      optionsEl.appendChild(btn);
-    });
-  }
+    let idx = 0;
 
-  function checkAnswer(selectedIndex) {
-    const q = questions[currentQuestion];
-    const correct = selectedIndex === q.answer;
-
-    if (correct) {
-      benarSound.play();
-      showImage(q.image);
-    } else {
-      salahSound.play();
+    function setProgress(i){
+      const percent = Math.round((i/quiz.length)*100);
+      bar.style.width = percent + '%';
     }
 
-    // Disable semua tombol
-    Array.from(optionsEl.children).forEach(btn => btn.disabled = true);
-  }
+    function renderQuestion(){
+      quizScreen.style.display = 'block';
+      logoScreen.classList.remove('active');
+      videoScreen.classList.remove('active');
 
-  function showImage(imageFile) {
-    feedbackEl.innerHTML = `
-      <img src="${imageFile}" alt="Gambar" />
-      <p>Memuat soal berikutnya...</p>
-    `;
+      const item = quiz[idx];
+      qtext.textContent = item.q;
+      opts.innerHTML = '';
 
-    if (currentQuestion === questions.length - 1) {
-      setTimeout(showEndScreen, 3000);
-    } else {
-      setTimeout(() => {
-        currentQuestion++;
-        loadQuestion();
-      }, 3000);
+      item.options.forEach((label, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.textContent = label;
+        btn.addEventListener('click', () => handleAnswer(i));
+        opts.appendChild(btn);
+      });
+
+      step.textContent = `Soal ${idx+1} dari ${quiz.length}`;
+      feedback.textContent = '';
+      setProgress(idx);
     }
-  }
 
-  function showEndScreen() {
-    quizContainer.style.display = "none";
-    endScreen.style.display = "block";
-    winSound.play(); // Putar suara kemenangan
-  }
+    function handleAnswer(chosen){
+      const correct = quiz[idx].correctIndex;
+      Array.from(opts.children).forEach((b, i)=>{
+        if(i===correct) b.classList.add('correct');
+        if(i===chosen && i!==correct) b.classList.add('wrong');
+        b.disabled = true;
+      });
 
-  // Mulai kuis
-  loadQuestion();
-</script>
+      if(chosen === correct){
+        feedback.textContent = '✅ Benar!';
+        toLogoThenNext();
+      }else{
+        feedback.textContent = '❌ Salah, coba lagi.';
+        setTimeout(()=>{
+          Array.from(opts.children).forEach((b)=>{b.classList.remove('wrong','correct'); b.disabled=false;});
+          feedback.textContent = '';
+        }, 800);
+      }
+    }
 
-</body>
+    function toLogoThenNext(){
+      quizScreen.style.display = 'none';
+      logoScreen.classList.add('active');
+      logoImg.src = LOGOS[idx];
+
+      const isLast = idx === quiz.length - 1;
+
+      setTimeout(()=>{
+        if(isLast){
+          logoScreen.classList.remove('active');
+          videoScreen.classList.add('active');
+          setProgress(quiz.length);
+          videoEl.play().catch(()=>{});
+        }else{
+          idx++;
+          renderQuestion();
+        }
+      }, 1200);
+    }
+
+    renderQuestion();
+  </script></body>
 </html>
